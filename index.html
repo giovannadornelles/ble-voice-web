@@ -632,7 +632,7 @@
 
       try {
         bleDevice = await navigator.bluetooth.requestDevice({
-          // acceptAllDevices: true, // Use se o UUID específico não funcionar
+          acceptAllDevices: true, // Use se o UUID específico não funcionar
           filters: [{ services: [serviceUUID] }],
           optionalServices: [serviceUUID]
         });
