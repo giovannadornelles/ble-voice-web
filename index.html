@@ -560,8 +560,8 @@
     const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
 
     // Default UUIDs (HM-10 module, very common)
-    const DEFAULT_SERVICE  = '0000ffe0-0000-1000-8000-00805f9b34fb';
-    const DEFAULT_CHAR     = '0000ffe1-0000-1000-8000-00805f9b34fb';
+    const DEFAULT_SERVICE  = '0000aabb-0000-1000-8000-0026bb765291';
+    const DEFAULT_CHAR     = '00001bb1-0000-1000-8000-00805f9b34fb';
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
     window.addEventListener('load', () => {
@@ -631,9 +631,13 @@
       addLog('Abrindo seletor de dispositivos BLE...', 'sys');
 
       try {
+        //bleDevice = await navigator.bluetooth.requestDevice({
+        //  //acceptAllDevices: true, // Use se o UUID específico não funcionar
+        //  filters: [{ services: [serviceUUID] }],
+        //  optionalServices: [serviceUUID]
+        //});
         bleDevice = await navigator.bluetooth.requestDevice({
-          acceptAllDevices: true, // Use se o UUID específico não funcionar
-          filters: [{ services: [serviceUUID] }],
+          filters: [ { name: 'BLE_THROUGHPUT' } ],
           optionalServices: [serviceUUID]
         });
       } catch(e) {
