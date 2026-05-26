@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>BLE Voice</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: rgba(255,255,255,0.08);
+      --accent: #6c8fff;
+      --accent-glow: rgba(108,143,255,0.15);
+      --green: #3ecf6e;
+      --green-bg: rgba(62,207,110,0.12);
+      --red: #ff5f5f;
+      --red-bg: rgba(255,95,95,0.12);
+      --amber: #ffb23e;
+      --amber-bg: rgba(255,178,62,0.12);
+      --text: #e8eaf0;
+      --text2: #8891aa;
+      --text3: #555d75;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    /* HEADER */
+    .header {
+      padding: 52px 24px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .header-title span {
+      color: var(--accent);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      transition: all 0.3s;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .status-dot.connecting { background: var(--amber); animation: pulse-amber 1.2s infinite; }
+    .status-dot.connected { background: var(--green); animation: pulse-green 2s infinite; }
+    .status-dot.error { background: var(--red); }
+
+    @keyframes pulse-amber {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.5; transform:scale(0.8); }
+    }
+    @keyframes pulse-green {
+      0%,100% { box-shadow: 0 0 0 0 rgba(62,207,110,0.5); }
+      50% { box-shadow: 0 0 0 5px rgba(62,207,110,0); }
+    }
+
+    /* CENTER CARD */
+    .center-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      gap: 24px;
+      min-height: 0;
+    }
+
+    .connect-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .ble-icon-wrap {
+      width: 72px;
+      height: 72px;
+      background: var(--accent-glow);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      border: 1.5px solid rgba(108,143,255,0.3);
+      transition: all 0.3s;
+    }
+
+    .ble-icon-wrap.connected {
+      background: var(--green-bg);
+      border-color: rgba(62,207,110,0.4);
+    }
+
+    .ble-icon-wrap svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .connect-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .connect-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .device-name {
+      font-size: 13px;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(108,143,255,0.2);
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin-bottom: 20px;
+      word-break: break-all;
+      display: none;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: -0.2px;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-connect {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-disconnect {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(255,95,95,0.2);
+      display: none;
+    }
+
+    /* CONFIG ROW */
+    .config-row {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: none;
+    }
+
+    .config-row.visible { display: block; }
+
+    .config-label {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .config-item label {
+      display: block;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 5px;
+    }
+
+    .config-item select,
+    .config-item input[type="range"] {
+      width: 100%;
+    }
+
+    .config-item select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .config-item .range-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .config-item input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+
+    .config-item .range-val {
+      font-size: 13px;
+      color: var(--accent);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    /* LOG / MESSAGES */
+    .log-area {
+      flex-shrink: 0;
+      padding: 0 24px 32px;
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .log-label {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+
+    .log-clear {
+      font-size: 12px;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color 0.2s;
+    }
+
+    .log-clear:hover { color: var(--text2); }
+
+    .log-scroll {
+      height: 180px;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-scroll::-webkit-scrollbar { width: 4px; }
+    .log-scroll::-webkit-scrollbar-track { background: transparent; }
+    .log-scroll::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
+
+    .log-entry {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: fadeSlide 0.2s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-time {
+      font-size: 11px;
+      color: var(--text3);
+      flex-shrink: 0;
+      padding-top: 1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-msg {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .log-msg.ble { color: var(--accent); }
+    .log-msg.tts { color: var(--green); }
+    .log-msg.err { color: var(--red); }
+    .log-msg.warn { color: var(--amber); }
+
+    .log-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .log-badge.ble { background: var(--accent-glow); color: var(--accent); }
+    .log-badge.tts { background: var(--green-bg); color: var(--green); }
+    .log-badge.err { background: var(--red-bg); color: var(--red); }
+    .log-badge.sys { background: rgba(255,255,255,0.06); color: var(--text3); }
+
+    /* TTS wave animation */
+    .wave-wrap {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      height: 20px;
+    }
+
+    .wave-wrap.speaking { display: flex; }
+
+    .wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--green);
+      animation: wave 0.6s ease-in-out infinite alternate;
+    }
+
+    .wave-bar:nth-child(1) { animation-delay: 0s;    height: 6px; }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s;  height: 14px; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s;  height: 20px; }
+    .wave-bar:nth-child(4) { animation-delay: 0.15s; height: 12px; }
+    .wave-bar:nth-child(5) { animation-delay: 0.05s; height: 7px; }
+
+    @keyframes wave {
+      from { transform: scaleY(0.3); }
+      to   { transform: scaleY(1); }
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* UUID config modal */
+    .uuid-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .uuid-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 9px 12px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .uuid-input::placeholder { color: var(--text3); }
+
+    .uuid-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 2px;
+    }
+
+    .uuid-row { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title">BLE <span>Voice</span></div>
+    <div class="status-pill" id="statusPill">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Desconectado</span>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-area">
+
+    <!-- BLE CONNECT CARD -->
+    <div class="connect-card">
+      <div class="ble-icon-wrap" id="bleIconWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--accent)" id="bleIconConnected" class="hidden">
+          <path d="M6.5 6.5l11 11M17.5 6.5L12 12l5.5 5.5M6.5 6.5L12 12l-5.5 5.5"/>
+        </svg>
+        <!-- Bluetooth symbol via paths -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" id="bleIconDefault" style="color: var(--accent)">
+          <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div id="connectTitle" class="connect-title">Conectar ao Device BLE</div>
+      <div id="connectDesc" class="connect-desc">Toque para buscar dispositivos Bluetooth próximos</div>
+
+      <div class="device-name" id="deviceName"></div>
+
+      <button class="btn btn-connect" id="btnConnect" onclick="connectBLE()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
+        Buscar & Conectar
+      </button>
+      <button class="btn btn-disconnect" id="btnDisconnect" onclick="disconnectBLE()">
+        Desconectar
+      </button>
+    </div>
+
+    <!-- TTS CONFIG -->
+    <div class="config-row" id="configRow">
+      <div class="config-label">Configurações de voz</div>
+      <div class="config-grid">
+        <div class="config-item" style="grid-column: 1/-1;">
+          <label>Voz</label>
+          <select id="voiceSelect" onchange="updateVoice()"></select>
+        </div>
+        <div class="config-item">
+          <label>Velocidade</label>
+          <div class="range-row">
+            <input type="range" min="0.5" max="2" step="0.1" value="1" id="rateSlider" oninput="updateRate(this)">
+            <span class="range-val" id="rateVal">1.0</span>
+          </div>
+        </div>
+        <div class="config-item">
+          <label>Volume</label>
+          <div class="range-row">
+            <input type="range" min="0" max="1" step="0.1" value="1" id="volSlider" oninput="updateVol(this)">
+            <span class="range-val" id="volVal">1.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="uuid-section">
+        <div class="config-label" style="margin-bottom:10px">UUIDs do Serviço BLE</div>
+        <div class="uuid-row">
+          <div class="uuid-label">Service UUID</div>
+          <input class="uuid-input" id="serviceUUID" type="text" placeholder="0000ffe0-0000-1000-8000-00805f9b34fb" />
+        </div>
+        <div class="uuid-row">
+          <div class="uuid-label">Characteristic UUID</div>
+          <input class="uuid-input" id="charUUID" type="text" placeholder="0000ffe1-0000-1000-8000-00805f9b34fb" />
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOG -->
+  <div class="log-area">
+    <div class="log-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="log-label">Mensagens recebidas</span>
+        <div class="wave-wrap" id="waveWrap">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+      <button class="log-clear" onclick="clearLog()">Limpar</button>
+    </div>
+    <div class="log-scroll" id="logScroll"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ─── STATE ───────────────────────────────────────────────────────────────
+    let bleDevice = null;
+    let bleServer = null;
+    let bleChar = null;
+    let wakeLock = null;
+    let ttsQueue = [];
+    let isSpeaking = false;
+    let voices = [];
+
+    const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
+
+    // Default UUIDs (HM-10 module, very common)
+    const DEFAULT_SERVICE  = '0000ffe0-0000-1000-8000-00805f9b34fb';
+    const DEFAULT_CHAR     = '0000ffe1-0000-1000-8000-00805f9b34fb';
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    window.addEventListener('load', () => {
+      document.getElementById('serviceUUID').value = DEFAULT_SERVICE;
+      document.getElementById('charUUID').value    = DEFAULT_CHAR;
+
+      if (!('bluetooth' in navigator)) {
+        addLog('Web Bluetooth não suportado. Use Chrome Android.', 'err');
+        document.getElementById('btnConnect').disabled = true;
+        document.getElementById('btnConnect').textContent = 'Bluetooth não suportado';
+        toast('⚠️ Use o Chrome Android para BLE');
+      } else {
+        addLog('Pronto. Aguardando conexão BLE.', 'sys');
+      }
+
+      loadVoices();
+      speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    });
+
+    // ─── VOICES ──────────────────────────────────────────────────────────────
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
+      const sel = document.getElementById('voiceSelect');
+      sel.innerHTML = '';
+      const pt = voices.filter(v => v.lang.startsWith('pt'));
+      const others = voices.filter(v => !v.lang.startsWith('pt'));
+      const addGroup = (label, list) => {
+        if (!list.length) return;
+        const g = document.createElement('optgroup');
+        g.label = label;
+        list.forEach((v, i) => {
+          const o = document.createElement('option');
+          o.value = v.name;
+          o.textContent = `${v.name} (${v.lang})`;
+          g.appendChild(o);
+        });
+        sel.appendChild(g);
+      };
+      addGroup('Português', pt);
+      addGroup('Outros', others);
+      if (pt.length) ttsConfig.voice = pt[0];
+    }
+
+    function updateVoice() {
+      const name = document.getElementById('voiceSelect').value;
+      ttsConfig.voice = voices.find(v => v.name === name) || null;
+    }
+
+    function updateRate(el) {
+      ttsConfig.rate = parseFloat(el.value);
+      document.getElementById('rateVal').textContent = ttsConfig.rate.toFixed(1);
+    }
+
+    function updateVol(el) {
+      ttsConfig.volume = parseFloat(el.value);
+      document.getElementById('volVal').textContent = ttsConfig.volume.toFixed(1);
+    }
+
+    // ─── BLE ──────────────────────────────────────────────────────────────────
+    async function connectBLE() {
+      if (!('bluetooth' in navigator)) return;
+
+      const serviceUUID = document.getElementById('serviceUUID').value.trim() || DEFAULT_SERVICE;
+      const charUUID    = document.getElementById('charUUID').value.trim()    || DEFAULT_CHAR;
+
+      setStatus('connecting', 'Buscando...');
+      addLog('Abrindo seletor de dispositivos BLE...', 'sys');
+
+      try {
+        bleDevice = await navigator.bluetooth.requestDevice({
+          // acceptAllDevices: true, // Use se o UUID específico não funcionar
+          filters: [{ services: [serviceUUID] }],
+          optionalServices: [serviceUUID]
+        });
+      } catch(e) {
+        if (e.name === 'NotFoundError') {
+          // Retry with acceptAllDevices
+          try {
+            bleDevice = await navigator.bluetooth.requestDevice({
+              acceptAllDevices: true,
+              optionalServices: [serviceUUID]
+            });
+          } catch(e2) {
+            setStatus('idle', 'Desconectado');
+            addLog('Nenhum dispositivo selecionado.', 'warn');
+            return;
+          }
+        } else {
+          setStatus('error', 'Erro');
+          addLog('Erro ao buscar: ' + e.message, 'err');
+          return;
+        }
+      }
+
+      addLog(`Dispositivo: "${bleDevice.name || 'Sem nome'}" — conectando...`, 'ble');
+      bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+      try {
+        bleServer = await bleDevice.gatt.connect();
+        addLog('GATT conectado. Buscando serviço...', 'ble');
+
+        const service = await bleServer.getPrimaryService(serviceUUID);
+        bleChar = await service.getCharacteristic(charUUID);
+
+        await bleChar.startNotifications();
+        bleChar.addEventListener('characteristicvaluechanged', onNotification);
+
+        setStatus('connected', 'Conectado');
+        showConnectedUI(bleDevice.name || 'Dispositivo BLE');
+        addLog('Notificações ativas. Aguardando dados...', 'tts');
+        toast('✅ Conectado! Aguardando mensagens...');
+        acquireWakeLock();
+      } catch(e) {
+        setStatus('error', 'Falhou');
+        addLog('Erro de conexão: ' + e.message, 'err');
+        toast('❌ Falha na conexão');
+      }
+    }
+
+    function onNotification(event) {
+      const decoder = new TextDecoder('utf-8');
+      const value = decoder.decode(event.target.value).trim();
+      if (!value) return;
+
+      const now = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+      addLog(value, 'tts', now);
+      enqueueTTS(value);
+    }
+
+    function onDisconnected() {
+      setStatus('idle', 'Desconectado');
+      showDisconnectedUI();
+      addLog('Dispositivo desconectado.', 'warn');
+      toast('🔴 Dispositivo desconectado');
+      releaseWakeLock();
+    }
+
+    async function disconnectBLE() {
+      if (bleDevice && bleDevice.gatt.connected) {
+        bleDevice.gatt.disconnect();
+      }
+    }
+
+    // ─── TTS ──────────────────────────────────────────────────────────────────
+    function enqueueTTS(text) {
+      ttsQueue.push(text);
+      if (!isSpeaking) processQueue();
+    }
+
+    function processQueue() {
+      if (!ttsQueue.length) {
+        isSpeaking = false;
+        setWave(false);
+        return;
+      }
+      isSpeaking = true;
+      setWave(true);
+      const text = ttsQueue.shift();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate   = ttsConfig.rate;
+      utt.pitch  = ttsConfig.pitch;
+      utt.volume = ttsConfig.volume;
+      utt.lang   = 'pt-BR';
+      if (ttsConfig.voice) utt.voice = ttsConfig.voice;
+      utt.onend = () => processQueue();
+      utt.onerror = (e) => {
+        addLog('Erro TTS: ' + e.error, 'err');
+        processQueue();
+      };
+      speechSynthesis.speak(utt);
+    }
+
+    // ─── WAKE LOCK ────────────────────────────────────────────────────────────
+    async function acquireWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          addLog('Wake lock ativo (tela não vai dormir).', 'sys');
+        } catch(e) { /* silencioso */ }
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock) { wakeLock.release(); wakeLock = null; }
+    }
+
+    // ─── UI HELPERS ──────────────────────────────────────────────────────────
+    function setStatus(state, text) {
+      const dot = document.getElementById('statusDot');
+      const span = document.getElementById('statusText');
+      dot.className = 'status-dot ' + (state === 'connecting' ? 'connecting' : state === 'connected' ? 'connected' : state === 'error' ? 'error' : '');
+      span.textContent = text;
+    }
+
+    function showConnectedUI(name) {
+      document.getElementById('deviceName').textContent = '📡 ' + name;
+      document.getElementById('deviceName').style.display = 'block';
+      document.getElementById('btnConnect').style.display = 'none';
+      document.getElementById('btnDisconnect').style.display = 'flex';
+      document.getElementById('connectTitle').textContent = 'Conectado!';
+      document.getElementById('connectDesc').textContent = 'Recebendo e reproduzindo mensagens automaticamente.';
+      document.getElementById('bleIconWrap').classList.add('connected');
+      document.getElementById('configRow').classList.add('visible');
+    }
+
+    function showDisconnectedUI() {
+      document.getElementById('deviceName').style.display = 'none';
+      document.getElementById('btnConnect').style.display = 'flex';
+      document.getElementById('btnDisconnect').style.display = 'none';
+      document.getElementById('connectTitle').textContent = 'Conectar ao Device BLE';
+      document.getElementById('connectDesc').textContent = 'Toque para buscar dispositivos Bluetooth próximos';
+      document.getElementById('bleIconWrap').classList.remove('connected');
+      setStatus('idle', 'Desconectado');
+    }
+
+    function setWave(on) {
+      document.getElementById('waveWrap').classList.toggle('speaking', on);
+    }
+
+    function addLog(msg, type = 'sys', time = null) {
+      const scroll = document.getElementById('logScroll');
+      const t = time || new Date().toLocaleTimeString('pt-BR', { hour12: false });
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const badgeMap = { ble: 'BLE', tts: 'VOZ', err: 'ERR', warn: 'AVISO', sys: 'SYS' };
+      const badge = document.createElement('span');
+      badge.className = 'log-badge ' + (type === 'warn' ? 'sys' : type);
+      badge.textContent = badgeMap[type] || 'SYS';
+
+      const timeEl = document.createElement('span');
+      timeEl.className = 'log-time';
+      timeEl.textContent = t;
+
+      const msgEl = document.createElement('span');
+      msgEl.className = 'log-msg ' + type;
+      msgEl.textContent = msg;
+
+      entry.appendChild(badge);
+      entry.appendChild(timeEl);
+      entry.appendChild(msgEl);
+      scroll.appendChild(entry);
+      scroll.scrollTop = scroll.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('logScroll').innerHTML = '';
+    }
+
+    let toastTimer;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+  </script>
+
+  <script>
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
