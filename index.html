@@ -109,10 +109,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 0 24px;
-      gap: 24px;
+      justify-content: flex-start; /* Resolvido o bug de scroll */
+      padding: 24px;
+      gap: 16px;
       min-height: 0;
+      overflow-y: auto;
     }
 
     .connect-card {
@@ -120,7 +121,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 28px 24px;
+      padding: 24px 24px;
       text-align: center;
     }
 
@@ -132,7 +133,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
+      margin: 0 auto 16px;
       border: 1.5px solid rgba(108,143,255,0.3);
       transition: all 0.3s;
     }
@@ -158,7 +159,7 @@
       font-size: 14px;
       color: var(--text2);
       line-height: 1.5;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     .device-name {
@@ -168,7 +169,7 @@
       border: 1px solid rgba(108,143,255,0.2);
       border-radius: 8px;
       padding: 8px 16px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       word-break: break-all;
       display: none;
     }
@@ -203,7 +204,7 @@
       display: none;
     }
 
-    /* CONFIG ROW */
+    /* CONFIG & COMMAND ROWS */
     .config-row {
       width: 100%;
       background: var(--surface);
@@ -268,6 +269,77 @@
       min-width: 28px;
       text-align: right;
     }
+
+    /* ESTILOS DO CAMPO DE COMANDO E MICROFONE */
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .cmd-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 14px 44px 14px 14px;
+      font-size: 14px;
+      transition: border-color 0.15s;
+    }
+
+    .cmd-input:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .mic-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--text2);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .mic-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    .mic-btn.recording {
+      color: var(--red);
+      background: var(--red-bg);
+      animation: pulse-red 1.2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,95,95,0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255,95,95,0); }
+    }
+
+    .btn-send {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-send:active { transform: scale(0.98); }
 
     /* LOG / MESSAGES */
     .log-area {
@@ -450,7 +522,6 @@
 </head>
 <body>
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-title">BLE <span>Voice</span></div>
     <div class="status-pill" id="statusPill">
@@ -459,16 +530,13 @@
     </div>
   </div>
 
-  <!-- CENTER -->
   <div class="center-area">
 
-    <!-- BLE CONNECT CARD -->
     <div class="connect-card">
       <div class="ble-icon-wrap" id="bleIconWrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--accent)" id="bleIconConnected" class="hidden">
           <path d="M6.5 6.5l11 11M17.5 6.5L12 12l5.5 5.5M6.5 6.5L12 12l-5.5 5.5"/>
         </svg>
-        <!-- Bluetooth symbol via paths -->
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" id="bleIconDefault" style="color: var(--accent)">
           <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -488,7 +556,28 @@
       </button>
     </div>
 
-    <!-- TTS CONFIG -->
+    <div class="config-row" id="commandRow">
+      <div class="config-label">Enviar Comando BLE</div>
+      <div class="input-group">
+        <input type="text" class="cmd-input" id="cmdInput" placeholder="Digite algo (ex: LED0 ON)..." onkeydown="if(event.key === 'Enter') sendBLECommand()">
+        <button class="mic-btn" id="micBtn" onclick="startSpeechRecognition()" title="Gravar por 5 segundos">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+      <button class="btn-send" onclick="sendBLECommand()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        Enviar Comando
+      </button>
+    </div>
+
     <div class="config-row" id="configRow">
       <div class="config-label">Configurações de voz</div>
       <div class="config-grid">
@@ -516,18 +605,21 @@
         <div class="config-label" style="margin-bottom:10px">UUIDs do Serviço BLE</div>
         <div class="uuid-row">
           <div class="uuid-label">Service UUID</div>
-          <input class="uuid-input" id="serviceUUID" type="text" placeholder="0000ffe0-0000-1000-8000-00805f9b34fb" />
+          <input class="uuid-input" id="serviceUUID" type="text" placeholder="0000aabb-0000-1000-8000-0026bb765291" />
         </div>
         <div class="uuid-row">
-          <div class="uuid-label">Characteristic UUID</div>
-          <input class="uuid-input" id="charUUID" type="text" placeholder="0000ffe1-0000-1000-8000-00805f9b34fb" />
+          <div class="uuid-label">Notify Characteristic (Receber)</div>
+          <input class="uuid-input" id="charUUID" type="text" placeholder="00001bb1-0000-1000-8000-00805f9b34fb" />
+        </div>
+        <div class="uuid-row">
+          <div class="uuid-label">Write Characteristic (Enviar)</div>
+          <input class="uuid-input" id="writeCharUUID" type="text" placeholder="00001aa1-0000-1000-8000-00805f9b34fb" />
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- LOG -->
   <div class="log-area">
     <div class="log-header">
       <div style="display:flex;align-items:center;gap:10px">
@@ -551,22 +643,28 @@
     // ─── STATE ───────────────────────────────────────────────────────────────
     let bleDevice = null;
     let bleServer = null;
-    let bleChar = null;
+    let bleChar = null; // Usada para Notificações (Receber)
+    let bleWriteChar = null; // Usada para Escrita (Enviar)
     let wakeLock = null;
     let ttsQueue = [];
     let isSpeaking = false;
     let voices = [];
+    
+    let recognition = null;
+    let recognitionTimer = null;
 
     const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
 
-    // Default UUIDs (HM-10 module, very common)
+    // UUIDs padrão atualizados
     const DEFAULT_SERVICE  = '0000aabb-0000-1000-8000-0026bb765291';
-    const DEFAULT_CHAR     = '00001bb1-0000-1000-8000-00805f9b34fb';
+    const DEFAULT_NOTIFY   = '00001bb1-0000-1000-8000-00805f9b34fb';
+    const DEFAULT_WRITE    = '00001aa1-0000-1000-8000-00805f9b34fb';
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
     window.addEventListener('load', () => {
       document.getElementById('serviceUUID').value = DEFAULT_SERVICE;
-      document.getElementById('charUUID').value    = DEFAULT_CHAR;
+      document.getElementById('charUUID').value    = DEFAULT_NOTIFY;
+      document.getElementById('writeCharUUID').value = DEFAULT_WRITE;
 
       if (!('bluetooth' in navigator)) {
         addLog('Web Bluetooth não suportado. Use Chrome Android.', 'err');
@@ -625,24 +723,17 @@
       if (!('bluetooth' in navigator)) return;
 
       const serviceUUID = document.getElementById('serviceUUID').value.trim() || DEFAULT_SERVICE;
-      const charUUID    = document.getElementById('charUUID').value.trim()    || DEFAULT_CHAR;
 
       setStatus('connecting', 'Buscando...');
       addLog('Abrindo seletor de dispositivos BLE...', 'sys');
 
       try {
-        //bleDevice = await navigator.bluetooth.requestDevice({
-        //  //acceptAllDevices: true, // Use se o UUID específico não funcionar
-        //  filters: [{ services: [serviceUUID] }],
-        //  optionalServices: [serviceUUID]
-        //});
         bleDevice = await navigator.bluetooth.requestDevice({
           filters: [ { name: 'BLE_THROUGHPUT' } ],
           optionalServices: [serviceUUID]
         });
       } catch(e) {
         if (e.name === 'NotFoundError') {
-          // Retry with acceptAllDevices
           try {
             bleDevice = await navigator.bluetooth.requestDevice({
               acceptAllDevices: true,
@@ -668,8 +759,16 @@
         addLog('GATT conectado. Buscando serviço...', 'ble');
 
         const service = await bleServer.getPrimaryService(serviceUUID);
-        bleChar = await service.getCharacteristic(charUUID);
+        
+        // Pega a característica de Notificação (Receber)
+        const notifyUUID = document.getElementById('charUUID').value.trim() || DEFAULT_NOTIFY;
+        bleChar = await service.getCharacteristic(notifyUUID);
+        
+        // Pega a característica de Escrita (Enviar)
+        const writeUUID = document.getElementById('writeCharUUID').value.trim() || DEFAULT_WRITE;
+        bleWriteChar = await service.getCharacteristic(writeUUID);
 
+        // Ativa as notificações na de receber
         await bleChar.startNotifications();
         bleChar.addEventListener('characteristicvaluechanged', onNotification);
 
@@ -706,6 +805,106 @@
     async function disconnectBLE() {
       if (bleDevice && bleDevice.gatt.connected) {
         bleDevice.gatt.disconnect();
+      }
+    }
+
+    // ─── ENVIO DE STRINGS PARA O MÓDULO ──────────────────────────────
+    async function sendBLECommand() {
+      const input = document.getElementById('cmdInput');
+      const text = input.value.trim();
+      
+      if (!text) return;
+      if (!bleWriteChar) {
+        toast('⚠️ Sem conexão ativa com módulo');
+        return;
+      }
+
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text + '\n'); 
+        
+        // Tentativa primária: Escrita sem resposta (rápida, comum em sistemas embarcados)
+        try {
+          await bleWriteChar.writeValueWithoutResponse(data);
+        } catch (e) {
+          // Fallback: Escrita com resposta (padrão)
+          await bleWriteChar.writeValue(data);
+        }
+        
+        addLog(`Comando Enviado: "${text}"`, 'sys');
+        input.value = ''; // Limpa o input após o envio bem-sucedido
+      } catch(e) {
+        addLog('Erro ao enviar comando: ' + e.message, 'err');
+        toast('❌ Falha ao enviar dado');
+      }
+    }
+
+    // ─── RECONHECIMENTO DE VOZ (MICROFONE) ──────────────────────────
+    function startSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        addLog('Reconhecimento de voz não suportado neste navegador.', 'warn');
+        toast('⚠️ Microfone não suportado');
+        return;
+      }
+
+      const micBtn = document.getElementById('micBtn');
+      const input = document.getElementById('cmdInput');
+
+      // Se clicar no botão enquanto já estiver gravando, para a gravação manualmente
+      if (micBtn.classList.contains('recording')) {
+        stopSpeechRecognition();
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false; 
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        micBtn.classList.add('recording');
+        toast('🎙️ Ouvindo por 5 segundos...');
+        
+        // Timeout para desligar automaticamente em 5 segundos
+        recognitionTimer = setTimeout(() => {
+          stopSpeechRecognition();
+          toast('⏳ Tempo esgotado, processando...');
+        }, 5000);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript; 
+        addLog(`Voz transcrita: "${transcript}"`, 'sys');
+        toast('📝 Texto pronto para envio!');
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error !== 'aborted') {
+          addLog('Erro no microfone: ' + e.error, 'err');
+          toast('❌ Falha na captura do áudio');
+        }
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove('recording');
+        if (recognitionTimer) {
+          clearTimeout(recognitionTimer);
+          recognitionTimer = null;
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch(e) {
+        addLog('Erro ao ligar microfone: ' + e.message, 'err');
+      }
+    }
+
+    function stopSpeechRecognition() {
+      if (recognition) {
+        recognition.stop();
       }
     }
 
@@ -769,6 +968,7 @@
       document.getElementById('connectDesc').textContent = 'Recebendo e reproduzindo mensagens automaticamente.';
       document.getElementById('bleIconWrap').classList.add('connected');
       document.getElementById('configRow').classList.add('visible');
+      document.getElementById('commandRow').classList.add('visible'); 
     }
 
     function showDisconnectedUI() {
@@ -778,6 +978,8 @@
       document.getElementById('connectTitle').textContent = 'Conectar ao Device BLE';
       document.getElementById('connectDesc').textContent = 'Toque para buscar dispositivos Bluetooth próximos';
       document.getElementById('bleIconWrap').classList.remove('connected');
+      document.getElementById('configRow').classList.remove('visible');
+      document.getElementById('commandRow').classList.remove('visible'); 
       setStatus('idle', 'Desconectado');
     }
 

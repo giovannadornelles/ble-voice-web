@@ -1,5 +1,10 @@
-const CACHE = 'ble-voice-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const CACHE = 'ble-voice-v2'; // Mudamos para v2 para forçar o navegador a baixar o novo index.html
+const ASSETS = [
+  '/', 
+  '/index.html', 
+  '/manifest.json', 
+  '/icon.svg'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
