@@ -556,6 +556,18 @@
       </button>
     </div>
 
+    <!-- ADIÇÃO: BOTÃO ENABLE AUDIO (POLLING) -->
+    <div class="config-row" id="audioPollingRow">
+      <div class="config-label">Telemetria Automática</div>
+      <button class="btn" id="btnAudioPolling" onclick="toggleAudioPolling()" style="background: var(--surface2); border: 1px solid var(--border); color: var(--text);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        Enable Audio
+      </button>
+    </div>
+
     <div class="config-row" id="commandRow">
       <div class="config-label">Enviar Comando BLE</div>
       <div class="input-group">
@@ -649,9 +661,10 @@
     let ttsQueue = [];
     let isSpeaking = false;
     let voices = [];
-    
     let recognition = null;
     let recognitionTimer = null;
+    let audioPollingInterval = null;
+    let isAudioPollingActive = false;
 
     const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
 
@@ -839,6 +852,63 @@
       }
     }
 
+    // ─── ENABLE AUDIO (POLLING A CADA 30s) ────────────────────────────────────
+    function toggleAudioPolling() {
+      const btn = document.getElementById('btnAudioPolling');
+      
+      if (isAudioPollingActive) {
+        // DESLIGAR
+        clearInterval(audioPollingInterval);
+        audioPollingInterval = null;
+        isAudioPollingActive = false;
+        
+        btn.style.background = 'var(--surface2)';
+        btn.style.color = 'var(--text)';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Enable Audio`;
+        
+        toast('⏹️ Telemetria automática desativada');
+        addLog('Polling de áudio (30s) parado.', 'sys');
+      } else {
+        // LIGAR
+        if (!bleWriteChar) {
+          toast('⚠️ Conecte ao módulo primeiro');
+          return;
+        }
+        
+        isAudioPollingActive = true;
+        
+        btn.style.background = 'var(--green-bg)';
+        btn.style.color = 'var(--green)';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--green);"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Disable Audio`;
+        
+        toast('▶️ Telemetria iniciada (30s)');
+        addLog('Polling de áudio iniciado. Solicitando dados a cada 30s...', 'sys');
+        
+        requestAudioData(); // Primeira chamada
+        
+        audioPollingInterval = setInterval(() => {
+          requestAudioData();
+        }, 30000);
+      }
+    }
+
+    async function requestAudioData() {
+      if (!bleWriteChar) return;
+      try {
+        const encoder = new TextEncoder();
+        // Substituir pelo comando real depois
+        const data = encoder.encode("GET_DATA\n"); 
+        
+        try {
+          await bleWriteChar.writeValueWithoutResponse(data);
+        } catch (e) {
+          await bleWriteChar.writeValue(data);
+        }
+      } catch(e) {
+        addLog('Erro no polling: ' + e.message, 'err');
+      }
+    }
+
     // ─── RECONHECIMENTO DE VOZ (MICROFONE) ──────────────────────────
     function startSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -968,7 +1038,8 @@
       document.getElementById('connectDesc').textContent = 'Recebendo e reproduzindo mensagens automaticamente.';
       document.getElementById('bleIconWrap').classList.add('connected');
       document.getElementById('configRow').classList.add('visible');
-      document.getElementById('commandRow').classList.add('visible'); 
+      document.getElementById('commandRow').classList.add('visible');
+      document.getElementById('audioPollingRow').classList.add('visible');
     }
 
     function showDisconnectedUI() {
@@ -979,7 +1050,8 @@
       document.getElementById('connectDesc').textContent = 'Toque para buscar dispositivos Bluetooth próximos';
       document.getElementById('bleIconWrap').classList.remove('connected');
       document.getElementById('configRow').classList.remove('visible');
-      document.getElementById('commandRow').classList.remove('visible'); 
+      document.getElementById('commandRow').classList.remove('visible');
+      document.getElementById('audioPollingRow').classList.remove('visible');
       setStatus('idle', 'Desconectado');
     }
 
