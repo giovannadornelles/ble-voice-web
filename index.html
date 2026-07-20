@@ -822,35 +822,55 @@
     }
 
     // ─── ENVIO DE STRINGS PARA O MÓDULO ──────────────────────────────
-    async function sendBLECommand() {
-      const input = document.getElementById('cmdInput');
-      const text = input.value.trim();
+
+      async function sendBLECommand() {
+
+        const input = document.getElementById('cmdInput');
+
+        const text = input.value.trim();
       
-      if (!text) return;
-      if (!bleWriteChar) {
-        toast('⚠️ Sem conexão ativa com módulo');
-        return;
+        if (!text) {
+
+          return;
+
+        }
+      
+        if (!bleWriteChar) {
+
+          toast('⚠️ Sem conexão ativa com módulo');
+
+          return;
+
+        }
+      
+        try {
+
+          await writeCommand(text);
+      
+          addLog(`Comando enviado: "${text}"`, 'sys');
+
+          input.value = '';
+
+        } catch (e) {
+
+          addLog(`Erro ao enviar comando: ${e.message}`, 'err');
+
+          toast('❌ Falha ao enviar dado');
+
+        }
+
       }
 
-      try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(text + '\n'); 
-        
-        // Tentativa primária: Escrita sem resposta (rápida, comum em sistemas embarcados)
-        try {
-          await bleWriteChar.writeValueWithoutResponse(data);
-        } catch (e) {
-          // Fallback: Escrita com resposta (padrão)
-          await bleWriteChar.writeValue(data);
-        }
-        
-        addLog(`Comando Enviado: "${text}"`, 'sys');
-        input.value = ''; // Limpa o input após o envio bem-sucedido
-      } catch(e) {
-        addLog('Erro ao enviar comando: ' + e.message, 'err');
-        toast('❌ Falha ao enviar dado');
+    async function writeCommand(text) {
+      if (!bleWriteChar) {
+        throw new Error('Característica de escrita indisponível');
       }
+    
+      const data = new TextEncoder().encode(text);
+    
+      await bleWriteChar.writeValueWithResponse(data);
     }
+ 
 
     // ─── ENABLE AUDIO (POLLING A CADA 30s) ────────────────────────────────────
     function toggleAudioPolling() {
@@ -897,10 +917,10 @@
       try {
         const encoder = new TextEncoder();
         // Substituir pelo comando real depois
-        const data = encoder.encode("GET_DATA\n"); 
+        const data = encoder.encode("enable audio"); 
         
         try {
-          await bleWriteChar.writeValueWithoutResponse(data);
+          await bleWriteChar.writeValueWithResponse(data);
         } catch (e) {
           await bleWriteChar.writeValue(data);
         }
