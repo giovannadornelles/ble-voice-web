@@ -873,15 +873,27 @@
  
 
     // ─── ENABLE AUDIO (POLLING A CADA 30s) ────────────────────────────────────
-    function toggleAudioPolling() {
+async function toggleAudioPolling() {
       const btn = document.getElementById('btnAudioPolling');
       
       if (isAudioPollingActive) {
-        // DESLIGAR
+        // --- DESLIGAR ---
         clearInterval(audioPollingInterval);
         audioPollingInterval = null;
         isAudioPollingActive = false;
         
+        // Envia a string "disable audio" para interromper o firmware
+        if (bleWriteChar) {
+          try {
+            const data = new TextEncoder().encode("disable audio");
+            await bleWriteChar.writeValueWithResponse(data);
+            addLog('Comando enviado: "disable audio"', 'sys');
+          } catch (e) {
+            addLog('Erro ao enviar disable audio: ' + e.message, 'err');
+          }
+        }
+        
+        // Volta o botão ao normal
         btn.style.background = 'var(--surface2)';
         btn.style.color = 'var(--text)';
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Enable Audio`;
@@ -889,7 +901,7 @@
         toast('⏹️ Telemetria automática desativada');
         addLog('Polling de áudio (30s) parado.', 'sys');
       } else {
-        // LIGAR
+        // --- LIGAR ---
         if (!bleWriteChar) {
           toast('⚠️ Conecte ao módulo primeiro');
           return;
@@ -897,6 +909,7 @@
         
         isAudioPollingActive = true;
         
+        // Muda o visual do botão para indicar que está ativo
         btn.style.background = 'var(--green-bg)';
         btn.style.color = 'var(--green)';
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--green);"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Disable Audio`;
@@ -904,26 +917,22 @@
         toast('▶️ Telemetria iniciada (30s)');
         addLog('Polling de áudio iniciado. Solicitando dados a cada 30s...', 'sys');
         
-        requestAudioData(); // Primeira chamada
+        // Faz a primeira requisição imediatamente
+        requestAudioData();
         
+        // Configura o intervalo para repetir a cada 30.000 ms (30 segundos)
         audioPollingInterval = setInterval(() => {
           requestAudioData();
         }, 30000);
       }
     }
 
-    async function requestAudioData() {
+async function requestAudioData() {
       if (!bleWriteChar) return;
       try {
-        const encoder = new TextEncoder();
-        // Substituir pelo comando real depois
-        const data = encoder.encode("enable audio"); 
-        
-        try {
-          await bleWriteChar.writeValueWithResponse(data);
-        } catch (e) {
-          await bleWriteChar.writeValue(data);
-        }
+        const data = new TextEncoder().encode("enable audio"); 
+        await bleWriteChar.writeValueWithResponse(data);
+        addLog('Comando enviado: "enable audio"', 'sys');
       } catch(e) {
         addLog('Erro no polling: ' + e.message, 'err');
       }
