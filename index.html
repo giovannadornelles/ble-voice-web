@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
@@ -47,61 +47,6 @@
       height: 100dvh;
     }
 
-    /* HEADER */
-    .header {
-      padding: 52px 24px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .header-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--text);
-    }
-
-    .header-title span {
-      color: var(--accent);
-    }
-
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text2);
-      transition: all 0.3s;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text3);
-      transition: all 0.3s;
-      flex-shrink: 0;
-    }
-
-    .status-dot.connecting { background: var(--amber); animation: pulse-amber 1.2s infinite; }
-    .status-dot.connected { background: var(--green); animation: pulse-green 2s infinite; }
-    .status-dot.error { background: var(--red); }
-
-    @keyframes pulse-amber {
-      0%,100% { opacity:1; transform:scale(1); }
-      50% { opacity:0.5; transform:scale(0.8); }
-    }
-    @keyframes pulse-green {
-      0%,100% { box-shadow: 0 0 0 0 rgba(62,207,110,0.5); }
-      50% { box-shadow: 0 0 0 5px rgba(62,207,110,0); }
-    }
 
     /* CENTER CARD */
     .center-area {
@@ -109,7 +54,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* Resolvido o bug de scroll */
+      justify-content: flex-start; 
       padding: 24px;
       gap: 16px;
       min-height: 0;
@@ -270,7 +215,7 @@
       text-align: right;
     }
 
-    /* ESTILOS DO CAMPO DE COMANDO E MICROFONE */
+    /* COMMAND INPUT */
     .input-group {
       position: relative;
       display: flex;
@@ -341,10 +286,18 @@
     }
     .btn-send:active { transform: scale(0.98); }
 
+    .btn-send:disabled {
+      background: var(--surface2);
+      color: var(--text3);
+      cursor: not-allowed;
+      transform: none;
+      border: 1px solid var(--border);
+    }
+
     /* LOG / MESSAGES */
     .log-area {
       flex-shrink: 0;
-      padding: 0 24px 32px;
+      padding: 0 20px 12px;
     }
 
     .log-header {
@@ -376,7 +329,7 @@
     .log-clear:hover { color: var(--text2); }
 
     .log-scroll {
-      height: 180px;
+      height: 160px;
       overflow-y: auto;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -489,46 +442,9 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-
-    /* UUID config modal */
-    .uuid-section {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    .uuid-input {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 9px 12px;
-      font-size: 12px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      width: 100%;
-      margin-top: 6px;
-    }
-
-    .uuid-input::placeholder { color: var(--text3); }
-
-    .uuid-label {
-      font-size: 12px;
-      color: var(--text2);
-      margin-bottom: 2px;
-    }
-
-    .uuid-row { margin-bottom: 10px; }
   </style>
 </head>
 <body>
-
-  <div class="header">
-    <div class="header-title">BLE <span>Voice</span></div>
-    <div class="status-pill" id="statusPill">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Desconectado</span>
-    </div>
-  </div>
 
   <div class="center-area">
 
@@ -542,23 +458,23 @@
         </svg>
       </div>
 
-      <div id="connectTitle" class="connect-title">Conectar ao Device BLE</div>
-      <div id="connectDesc" class="connect-desc">Toque para buscar dispositivos BLE próximos</div>
+      <div id="connectTitle" class="connect-title">Connect to BLE Device</div>
+      <div id="connectDesc" class="connect-desc">Tap to scan for nearby BLE devices</div>
 
       <div class="device-name" id="deviceName"></div>
 
       <button class="btn btn-connect" id="btnConnect" onclick="connectBLE()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
-        Buscar & Conectar
+        Scan & Connect
       </button>
       <button class="btn btn-disconnect" id="btnDisconnect" onclick="disconnectBLE()">
-        Desconectar
+        Disconnect
       </button>
     </div>
 
-    <!-- ADIÇÃO: BOTÃO ENABLE AUDIO (POLLING) -->
+    <!-- BUTTON ENABLE AUDIO -->
     <div class="config-row" id="audioPollingRow">
-      <div class="config-label">Telemetria Automática</div>
+      <div class="config-label">Automatic Telemetry</div>
       <button class="btn" id="btnAudioPolling" onclick="toggleAudioPolling()" style="background: var(--surface2); border: 1px solid var(--border); color: var(--text);">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -568,11 +484,38 @@
       </button>
     </div>
 
+    <!-- BUTTON ENABLE WIFI -->
+    <div class="config-row" id="wifiRow">
+      <div class="config-label">Wi-Fi Control</div>
+      <button class="btn" id="btnWifi" onclick="toggleWifi()" style="background: var(--surface2); border: 1px solid var(--border); color: var(--text);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+        Enable WiFi
+      </button>
+
+      <!-- WIFI INSTRUCTIONS -->
+      <div id="wifiInstructions" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
+        <p style="font-size: 13px; color: var(--text2); margin-bottom: 12px;">Connect to the network below and access settings:</p>
+        <p style="font-size: 15px; color: var(--text); margin-bottom: 6px;">SSID: <strong style="color: var(--accent);">MY_AP_SSID</strong></p>
+        <p style="font-size: 15px; color: var(--text); margin-bottom: 16px;">Password: <strong style="color: var(--accent);">MY_AP_PASSPHRASE</strong></p>
+        
+        <a href="http://192.168.10.10" target="_blank" class="btn" style="background: var(--accent); color: #fff; text-decoration: none; padding: 12px; font-size: 14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Module Settings
+        </a>
+      </div>
+    </div>
+
+    <!-- SEND COMMAND -->
     <div class="config-row" id="commandRow">
-      <div class="config-label">Enviar Comando BLE</div>
+      <div class="config-label">Send BLE Command</div>
       <div class="input-group">
-        <input type="text" class="cmd-input" id="cmdInput" placeholder="Digite algo (ex: LED0 ON)..." onkeydown="if(event.key === 'Enter') sendBLECommand()">
-        <button class="mic-btn" id="micBtn" onclick="startSpeechRecognition()" title="Gravar por 5 segundos">
+        <input type="text" class="cmd-input" id="cmdInput" placeholder="Type something (e.g., LED0 ON)..." onkeydown="if(event.key === 'Enter') sendBLECommand()">
+        <button class="mic-btn" id="micBtn" onclick="startSpeechRecognition()" title="Record for 5 seconds">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -581,24 +524,25 @@
           </svg>
         </button>
       </div>
-      <button class="btn-send" onclick="sendBLECommand()">
+      <button class="btn-send" id="btnSend" onclick="sendBLECommand()">        
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
-        Enviar Comando
+        Send Command
       </button>
     </div>
 
+    <!-- TTS CONFIG -->
     <div class="config-row" id="configRow">
-      <div class="config-label">Configurações de voz</div>
+      <div class="config-label">Voice Settings</div>
       <div class="config-grid">
         <div class="config-item" style="grid-column: 1/-1;">
-          <label>Voz</label>
+          <label>Voice</label>
           <select id="voiceSelect" onchange="updateVoice()"></select>
         </div>
         <div class="config-item">
-          <label>Velocidade</label>
+          <label>Speed</label>
           <div class="range-row">
             <input type="range" min="0.5" max="2" step="0.1" value="1" id="rateSlider" oninput="updateRate(this)">
             <span class="range-val" id="rateVal">1.0</span>
@@ -612,22 +556,6 @@
           </div>
         </div>
       </div>
-
-      <div class="uuid-section">
-        <div class="config-label" style="margin-bottom:10px">UUIDs do Serviço BLE</div>
-        <div class="uuid-row">
-          <div class="uuid-label">Service UUID</div>
-          <input class="uuid-input" id="serviceUUID" type="text" placeholder="0000aabb-0000-1000-8000-0026bb765291" />
-        </div>
-        <div class="uuid-row">
-          <div class="uuid-label">Notify Characteristic (Receber)</div>
-          <input class="uuid-input" id="charUUID" type="text" placeholder="00001bb1-0000-1000-8000-00805f9b34fb" />
-        </div>
-        <div class="uuid-row">
-          <div class="uuid-label">Write Characteristic (Enviar)</div>
-          <input class="uuid-input" id="writeCharUUID" type="text" placeholder="00001aa1-0000-1000-8000-00805f9b34fb" />
-        </div>
-      </div>
     </div>
 
   </div>
@@ -635,7 +563,7 @@
   <div class="log-area">
     <div class="log-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <span class="log-label">Mensagens recebidas</span>
+        <span class="log-label">Received Messages</span>
         <div class="wave-wrap" id="waveWrap">
           <div class="wave-bar"></div>
           <div class="wave-bar"></div>
@@ -644,7 +572,7 @@
           <div class="wave-bar"></div>
         </div>
       </div>
-      <button class="log-clear" onclick="clearLog()">Limpar</button>
+      <button class="log-clear" onclick="clearLog()">Clear</button>
     </div>
     <div class="log-scroll" id="logScroll"></div>
   </div>
@@ -655,8 +583,8 @@
     // ─── STATE ───────────────────────────────────────────────────────────────
     let bleDevice = null;
     let bleServer = null;
-    let bleChar = null; // Usada para Notificações (Receber)
-    let bleWriteChar = null; // Usada para Escrita (Enviar)
+    let bleChar = null; // Notify
+    let bleWriteChar = null; // Write
     let wakeLock = null;
     let ttsQueue = [];
     let isSpeaking = false;
@@ -665,27 +593,24 @@
     let recognitionTimer = null;
     let audioPollingInterval = null;
     let isAudioPollingActive = false;
+    let isWifiActive = false;
 
     const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
 
-    // UUIDs padrão atualizados
+    // Built-in UUIDs (Hidden from UI)
     const DEFAULT_SERVICE  = '0000aabb-0000-1000-8000-0026bb765291';
     const DEFAULT_NOTIFY   = '00001bb1-0000-1000-8000-00805f9b34fb';
     const DEFAULT_WRITE    = '00001aa1-0000-1000-8000-00805f9b34fb';
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
     window.addEventListener('load', () => {
-      document.getElementById('serviceUUID').value = DEFAULT_SERVICE;
-      document.getElementById('charUUID').value    = DEFAULT_NOTIFY;
-      document.getElementById('writeCharUUID').value = DEFAULT_WRITE;
-
       if (!('bluetooth' in navigator)) {
-        addLog('Web Bluetooth não suportado. Use Chrome Android.', 'err');
+        addLog('Web Bluetooth is not supported. Use Chrome Android.', 'err');
         document.getElementById('btnConnect').disabled = true;
-        document.getElementById('btnConnect').textContent = 'Bluetooth não suportado';
-        toast('⚠️ Use o Chrome Android para BLE');
+        document.getElementById('btnConnect').textContent = 'Bluetooth not supported';
+        toast('⚠️ Use Chrome Android for BLE');
       } else {
-        addLog('Pronto. Aguardando conexão BLE.', 'sys');
+        addLog('Ready. Waiting for BLE connection.', 'sys');
       }
 
       loadVoices();
@@ -697,8 +622,10 @@
       voices = speechSynthesis.getVoices();
       const sel = document.getElementById('voiceSelect');
       sel.innerHTML = '';
-      const pt = voices.filter(v => v.lang.startsWith('pt'));
-      const others = voices.filter(v => !v.lang.startsWith('pt'));
+      
+      const en = voices.filter(v => v.lang.startsWith('en'));
+      const others = voices.filter(v => !v.lang.startsWith('en'));
+      
       const addGroup = (label, list) => {
         if (!list.length) return;
         const g = document.createElement('optgroup');
@@ -711,9 +638,11 @@
         });
         sel.appendChild(g);
       };
-      addGroup('Português', pt);
-      addGroup('Outros', others);
-      if (pt.length) ttsConfig.voice = pt[0];
+      
+      addGroup('English', en);
+      addGroup('Others', others);
+      
+      if (en.length) ttsConfig.voice = en[0];
     }
 
     function updateVoice() {
@@ -735,10 +664,10 @@
     async function connectBLE() {
       if (!('bluetooth' in navigator)) return;
 
-      const serviceUUID = document.getElementById('serviceUUID').value.trim() || DEFAULT_SERVICE;
+      const serviceUUID = DEFAULT_SERVICE;
 
-      setStatus('connecting', 'Buscando...');
-      addLog('Abrindo seletor de dispositivos BLE...', 'sys');
+      setStatus('connecting', 'Connecting...');
+      addLog('Opening BLE device selector...', 'sys');
 
       try {
         bleDevice = await navigator.bluetooth.requestDevice({
@@ -753,47 +682,41 @@
               optionalServices: [serviceUUID]
             });
           } catch(e2) {
-            setStatus('idle', 'Desconectado');
-            addLog('Nenhum dispositivo selecionado.', 'warn');
+            setStatus('idle', 'Disconnected');
+            addLog('No device selected.', 'warn');
             return;
           }
         } else {
-          setStatus('error', 'Erro');
-          addLog('Erro ao buscar: ' + e.message, 'err');
+          setStatus('error', 'Error');
+          addLog('Error searching: ' + e.message, 'err');
           return;
         }
       }
 
-      addLog(`Dispositivo: "${bleDevice.name || 'Sem nome'}" — conectando...`, 'ble');
+      addLog(`Device: "${bleDevice.name || 'Unnamed'}" — connecting...`, 'ble');
       bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
       try {
         bleServer = await bleDevice.gatt.connect();
-        addLog('GATT conectado. Buscando serviço...', 'ble');
+        addLog('GATT connected. Searching for service...', 'ble');
 
         const service = await bleServer.getPrimaryService(serviceUUID);
         
-        // Pega a característica de Notificação (Receber)
-        const notifyUUID = document.getElementById('charUUID').value.trim() || DEFAULT_NOTIFY;
-        bleChar = await service.getCharacteristic(notifyUUID);
-        
-        // Pega a característica de Escrita (Enviar)
-        const writeUUID = document.getElementById('writeCharUUID').value.trim() || DEFAULT_WRITE;
-        bleWriteChar = await service.getCharacteristic(writeUUID);
+        bleChar = await service.getCharacteristic(DEFAULT_NOTIFY);
+        bleWriteChar = await service.getCharacteristic(DEFAULT_WRITE);
 
-        // Ativa as notificações na de receber
         await bleChar.startNotifications();
         bleChar.addEventListener('characteristicvaluechanged', onNotification);
 
-        setStatus('connected', 'Conectado');
-        showConnectedUI(bleDevice.name || 'Dispositivo BLE');
-        addLog('Notificações ativas. Aguardando dados...', 'tts');
-        toast('✅ Conectado! Aguardando mensagens...');
+        setStatus('connected', 'Connected');
+        showConnectedUI(bleDevice.name || 'BLE Device');
+        addLog('Notifications active. Waiting for data...', 'tts');
+        toast('✅ Connected! Waiting for messages...');
         acquireWakeLock();
       } catch(e) {
-        setStatus('error', 'Falhou');
-        addLog('Erro de conexão: ' + e.message, 'err');
-        toast('❌ Falha na conexão');
+        setStatus('error', 'Failed');
+        addLog('Connection error: ' + e.message, 'err');
+        toast('❌ Connection failed');
       }
     }
 
@@ -802,16 +725,16 @@
       const value = decoder.decode(event.target.value).trim();
       if (!value) return;
 
-      const now = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+      const now = new Date().toLocaleTimeString('en-US', { hour12: false });
       addLog(value, 'tts', now);
       enqueueTTS(value);
     }
 
     function onDisconnected() {
-      setStatus('idle', 'Desconectado');
+      setStatus('idle', 'Disconnected');
       showDisconnectedUI();
-      addLog('Dispositivo desconectado.', 'warn');
-      toast('🔴 Dispositivo desconectado');
+      addLog('Device disconnected.', 'warn');
+      toast('🔴 Device disconnected');
       releaseWakeLock();
     }
 
@@ -821,173 +744,232 @@
       }
     }
 
-    // ─── ENVIO DE STRINGS PARA O MÓDULO ──────────────────────────────
-
-      async function sendBLECommand() {
-
-        const input = document.getElementById('cmdInput');
-
-        const text = input.value.trim();
-      
-        if (!text) {
-
-          return;
-
-        }
-      
-        if (!bleWriteChar) {
-
-          toast('⚠️ Sem conexão ativa com módulo');
-
-          return;
-
-        }
-      
-        try {
-
-          await writeCommand(text);
-      
-          addLog(`Comando enviado: "${text}"`, 'sys');
-
-          input.value = '';
-
-        } catch (e) {
-
-          addLog(`Erro ao enviar comando: ${e.message}`, 'err');
-
-          toast('❌ Falha ao enviar dado');
-
-        }
-
+    // ─── BLE COMMANDS ────────────────────────────────────────────────────────
+async function sendBLECommand() {
+      const input = document.getElementById('cmdInput');
+      const text = input.value.trim();
+    
+      if (!text) {
+        return;
       }
+    
+      if (!bleWriteChar) {
+        toast('⚠️ No active module connection');
+        return;
+      }
+
+      const lowerText = text.toLowerCase();
+      
+      // Intercepts wi-fi commands
+      if (lowerText === "enable wifi") {
+        if (!isWifiActive) await toggleWifi();
+        input.value = '';
+        return;
+      } else if (lowerText === "disable wifi") {
+        if (isWifiActive) await toggleWifi();
+        input.value = '';
+        return;
+      }
+      
+      // Intercepts audio commands
+      else if (lowerText === "enable audio") {
+        if (!isAudioPollingActive) await toggleAudioPolling();
+        input.value = '';
+        return;
+      } else if (lowerText === "disable audio") {
+        if (isAudioPollingActive) await toggleAudioPolling();
+        input.value = '';
+        return;
+      }
+    
+      try {
+        await writeCommand(text);
+        addLog(`Command sent: "${text}"`, 'sys');
+        input.value = '';
+      } catch (e) {
+        addLog(`Error sending command: ${e.message}`, 'err');
+        toast('❌ Failed to send data');
+      }
+    }
 
     async function writeCommand(text) {
       if (!bleWriteChar) {
-        throw new Error('Característica de escrita indisponível');
+        throw new Error('Write characteristic unavailable');
       }
-    
       const data = new TextEncoder().encode(text);
-    
       await bleWriteChar.writeValueWithResponse(data);
     }
  
-
-    // ─── ENABLE AUDIO (POLLING A CADA 30s) ────────────────────────────────────
-async function toggleAudioPolling() {
+    // ─── POLLING & WIFI ──────────────────────────────────────────────────────
+    async function toggleAudioPolling() {
       const btn = document.getElementById('btnAudioPolling');
       
       if (isAudioPollingActive) {
-        // --- DESLIGAR ---
+        // --- DISABLE ---
         clearInterval(audioPollingInterval);
         audioPollingInterval = null;
         isAudioPollingActive = false;
         
-        // Envia a string "disable audio" para interromper o firmware
         if (bleWriteChar) {
           try {
             const data = new TextEncoder().encode("disable audio");
             await bleWriteChar.writeValueWithResponse(data);
-            addLog('Comando enviado: "disable audio"', 'sys');
+            addLog('Command sent: "disable audio"', 'sys');
           } catch (e) {
-            addLog('Erro ao enviar disable audio: ' + e.message, 'err');
+            addLog('Error sending disable audio: ' + e.message, 'err');
           }
         }
         
-        // Volta o botão ao normal
         btn.style.background = 'var(--surface2)';
         btn.style.color = 'var(--text)';
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Enable Audio`;
         
-        toast('⏹️ Telemetria automática desativada');
-        addLog('Polling de áudio (30s) parado.', 'sys');
+        toast('⏹️ Automatic telemetry disabled');
+        addLog('Audio polling (30s) stopped.', 'sys');
       } else {
-        // --- LIGAR ---
+        // --- ENABLE ---
         if (!bleWriteChar) {
-          toast('⚠️ Conecte ao módulo primeiro');
+          toast('⚠️ Connect to the module first');
           return;
         }
         
         isAudioPollingActive = true;
         
-        // Muda o visual do botão para indicar que está ativo
-        btn.style.background = 'var(--green-bg)';
-        btn.style.color = 'var(--green)';
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--green);"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Disable Audio`;
+        // Red Disable state
+        btn.style.background = 'var(--red-bg)';
+        btn.style.color = 'var(--red)';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--red);"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Disable Audio`;
         
-        toast('▶️ Telemetria iniciada (30s)');
-        addLog('Polling de áudio iniciado. Solicitando dados a cada 30s...', 'sys');
+        toast('▶️ Telemetry started (30s)');
+        addLog('Audio polling started. Requesting data every 30s...', 'sys');
         
-        // Faz a primeira requisição imediatamente
         requestAudioData();
         
-        // Configura o intervalo para repetir a cada 30.000 ms (30 segundos)
         audioPollingInterval = setInterval(() => {
           requestAudioData();
         }, 30000);
       }
     }
 
-async function requestAudioData() {
+    async function toggleWifi() {
+      const btn = document.getElementById('btnWifi');
+      const instr = document.getElementById('wifiInstructions');
+      
+      if (isWifiActive) {
+        // --- DISABLE ---
+        if (bleWriteChar) {
+          try {
+            const data = new TextEncoder().encode("disable wifi");
+            await bleWriteChar.writeValueWithResponse(data);
+            addLog('Command sent: "disable wifi"', 'sys');
+          } catch (e) {
+            addLog('Error sending disable wifi: ' + e.message, 'err');
+          }
+        }
+        
+        isWifiActive = false;
+        
+        instr.style.display = 'none';
+        btn.style.background = 'var(--surface2)';
+        btn.style.color = 'var(--text)';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--accent);"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> Enable WiFi`;
+        
+        toast('📶 Wi-Fi disabled');
+      } else {
+        // --- ENABLE ---
+        if (!bleWriteChar) {
+          toast('⚠️ Connect to the module first');
+          return;
+        }
+        
+        try {
+          const data = new TextEncoder().encode("enable wifi");
+          await bleWriteChar.writeValueWithResponse(data);
+          addLog('Command sent: "enable wifi"', 'sys');
+        } catch (e) {
+          addLog('Error sending enable wifi: ' + e.message, 'err');
+          return;
+        }
+
+        isWifiActive = true;
+        
+        // Red Disable state
+        instr.style.display = 'block';
+        btn.style.background = 'var(--red-bg)';
+        btn.style.color = 'var(--red)';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: var(--red);"><line x1="2" y1="2" x2="22" y2="22"></line><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> Disable WiFi`;
+        
+        toast('📶 Wi-Fi enabled');
+      }
+    }
+
+    async function requestAudioData() {
       if (!bleWriteChar) return;
       try {
         const data = new TextEncoder().encode("enable audio"); 
         await bleWriteChar.writeValueWithResponse(data);
-        addLog('Comando enviado: "enable audio"', 'sys');
+        addLog('Command sent: "enable audio"', 'sys');
       } catch(e) {
-        addLog('Erro no polling: ' + e.message, 'err');
+        addLog('Polling error: ' + e.message, 'err');
       }
     }
 
-    // ─── RECONHECIMENTO DE VOZ (MICROFONE) ──────────────────────────
-    function startSpeechRecognition() {
+    // ─── SPEECH RECOGNITION ──────────────────────────────────────────────────
+function startSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        addLog('Reconhecimento de voz não suportado neste navegador.', 'warn');
-        toast('⚠️ Microfone não suportado');
+        addLog('Speech recognition not supported in this browser.', 'warn');
+        toast('⚠️ Microphone not supported');
         return;
       }
 
       const micBtn = document.getElementById('micBtn');
       const input = document.getElementById('cmdInput');
+      const sendBtn = document.getElementById('btnSend'); // Capturamos o botão de envio
 
-      // Se clicar no botão enquanto já estiver gravando, para a gravação manualmente
       if (micBtn.classList.contains('recording')) {
         stopSpeechRecognition();
         return;
       }
 
       recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
+      recognition.lang = 'en-US'; 
       recognition.interimResults = false; 
       recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
         micBtn.classList.add('recording');
-        toast('🎙️ Ouvindo por 5 segundos...');
+        sendBtn.disabled = true; // Desabilita e deixa o botão cinza
+        toast('🎙️ Listening for 3 seconds...');
         
-        // Timeout para desligar automaticamente em 5 segundos
+        // Timeout alterado para 3 segundos
         recognitionTimer = setTimeout(() => {
           stopSpeechRecognition();
-          toast('⏳ Tempo esgotado, processando...');
-        }, 5000);
+          toast("⏳ Time's up, processing...");
+        }, 3000);
       };
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         input.value = transcript; 
-        addLog(`Voz transcrita: "${transcript}"`, 'sys');
-        toast('📝 Texto pronto para envio!');
+        addLog(`Transcribed voice: "${transcript}"`, 'sys');
+        
+        // ENVIAR AUTOMATICAMENTE: Não precisa mais clicar no botão
+        sendBLECommand();
       };
 
       recognition.onerror = (e) => {
         if (e.error !== 'aborted') {
-          addLog('Erro no microfone: ' + e.error, 'err');
-          toast('❌ Falha na captura do áudio');
+          addLog('Microphone error: ' + e.error, 'err');
+          toast('❌ Failed to capture audio');
         }
+        sendBtn.disabled = false; // Reabilita em caso de erro
       };
 
       recognition.onend = () => {
         micBtn.classList.remove('recording');
+        sendBtn.disabled = false; // Reabilita o botão ao terminar a captura
+        
         if (recognitionTimer) {
           clearTimeout(recognitionTimer);
           recognitionTimer = null;
@@ -997,13 +979,8 @@ async function requestAudioData() {
       try {
         recognition.start();
       } catch(e) {
-        addLog('Erro ao ligar microfone: ' + e.message, 'err');
-      }
-    }
-
-    function stopSpeechRecognition() {
-      if (recognition) {
-        recognition.stop();
+        addLog('Error starting microphone: ' + e.message, 'err');
+        sendBtn.disabled = false; // Reabilita se não conseguir ligar o mic
       }
     }
 
@@ -1026,11 +1003,11 @@ async function requestAudioData() {
       utt.rate   = ttsConfig.rate;
       utt.pitch  = ttsConfig.pitch;
       utt.volume = ttsConfig.volume;
-      utt.lang   = 'pt-BR';
+      utt.lang   = 'en-US'; // TRANSLATED TO ENGLISH
       if (ttsConfig.voice) utt.voice = ttsConfig.voice;
       utt.onend = () => processQueue();
       utt.onerror = (e) => {
-        addLog('Erro TTS: ' + e.error, 'err');
+        addLog('TTS Error: ' + e.error, 'err');
         processQueue();
       };
       speechSynthesis.speak(utt);
@@ -1041,8 +1018,8 @@ async function requestAudioData() {
       if ('wakeLock' in navigator) {
         try {
           wakeLock = await navigator.wakeLock.request('screen');
-          addLog('Wake lock ativo (tela não vai dormir).', 'sys');
-        } catch(e) { /* silencioso */ }
+          addLog("Wake lock active (screen won't sleep).", 'sys');
+        } catch(e) { /* silent */ }
       }
     }
 
@@ -1052,10 +1029,6 @@ async function requestAudioData() {
 
     // ─── UI HELPERS ──────────────────────────────────────────────────────────
     function setStatus(state, text) {
-      const dot = document.getElementById('statusDot');
-      const span = document.getElementById('statusText');
-      dot.className = 'status-dot ' + (state === 'connecting' ? 'connecting' : state === 'connected' ? 'connected' : state === 'error' ? 'error' : '');
-      span.textContent = text;
     }
 
     function showConnectedUI(name) {
@@ -1063,25 +1036,27 @@ async function requestAudioData() {
       document.getElementById('deviceName').style.display = 'block';
       document.getElementById('btnConnect').style.display = 'none';
       document.getElementById('btnDisconnect').style.display = 'flex';
-      document.getElementById('connectTitle').textContent = 'Conectado!';
-      document.getElementById('connectDesc').textContent = 'Recebendo e reproduzindo mensagens automaticamente.';
+      document.getElementById('connectTitle').textContent = 'Connected!';
+      document.getElementById('connectDesc').textContent = 'Receiving and playing messages automatically.';
       document.getElementById('bleIconWrap').classList.add('connected');
       document.getElementById('configRow').classList.add('visible');
       document.getElementById('commandRow').classList.add('visible');
       document.getElementById('audioPollingRow').classList.add('visible');
+      document.getElementById('wifiRow').classList.add('visible');
     }
 
     function showDisconnectedUI() {
       document.getElementById('deviceName').style.display = 'none';
       document.getElementById('btnConnect').style.display = 'flex';
       document.getElementById('btnDisconnect').style.display = 'none';
-      document.getElementById('connectTitle').textContent = 'Conectar ao Device BLE';
-      document.getElementById('connectDesc').textContent = 'Toque para buscar dispositivos Bluetooth próximos';
+      document.getElementById('connectTitle').textContent = 'Connect to BLE Device';
+      document.getElementById('connectDesc').textContent = 'Tap to scan for nearby Bluetooth devices';
       document.getElementById('bleIconWrap').classList.remove('connected');
       document.getElementById('configRow').classList.remove('visible');
       document.getElementById('commandRow').classList.remove('visible');
       document.getElementById('audioPollingRow').classList.remove('visible');
-      setStatus('idle', 'Desconectado');
+      document.getElementById('wifiRow').classList.remove('visible');
+      setStatus('idle', 'Disconnected');
     }
 
     function setWave(on) {
@@ -1090,11 +1065,11 @@ async function requestAudioData() {
 
     function addLog(msg, type = 'sys', time = null) {
       const scroll = document.getElementById('logScroll');
-      const t = time || new Date().toLocaleTimeString('pt-BR', { hour12: false });
+      const t = time || new Date().toLocaleTimeString('en-US', { hour12: false });
       const entry = document.createElement('div');
       entry.className = 'log-entry';
 
-      const badgeMap = { ble: 'BLE', tts: 'VOZ', err: 'ERR', warn: 'AVISO', sys: 'SYS' };
+      const badgeMap = { ble: 'BLE', tts: 'VOICE', err: 'ERR', warn: 'WARN', sys: 'SYS' };
       const badge = document.createElement('span');
       badge.className = 'log-badge ' + (type === 'warn' ? 'sys' : type);
       badge.textContent = badgeMap[type] || 'SYS';
@@ -1129,7 +1104,6 @@ async function requestAudioData() {
   </script>
 
   <script>
-    // Service Worker registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
