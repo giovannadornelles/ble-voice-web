@@ -894,6 +894,21 @@
       enqueueTTS(value);
     }
 
+    function onDisconnected() {
+      isRssiActive = false;
+      setStatus('idle', 'Disconnected');
+      showDisconnectedUI();
+      addLog('Device disconnected.', 'warn');
+      toast('🔴 Device disconnected');
+      releaseWakeLock();
+    }
+
+    async function disconnectBLE() {
+      if (bleDevice && bleDevice.gatt.connected) {
+        bleDevice.gatt.disconnect();
+      }
+    }
+
     // ─── BLE COMMANDS ────────────────────────────────────────────────────────
 async function sendBLECommand() {
       const input = document.getElementById('cmdInput');

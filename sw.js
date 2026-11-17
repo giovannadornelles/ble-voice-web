@@ -1,9 +1,9 @@
-const CACHE = 'ble-voice-v2'; // Mudamos para v2 para forçar o navegador a baixar o novo index.html
+const CACHE_NAME = 'ble-voice-v2';
 const ASSETS = [
-  '/', 
-  '/index.html', 
-  '/manifest.json', 
-  '/icon.svg'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', e => {
