@@ -419,6 +419,126 @@
       to   { transform: scaleY(1); }
     }
 
+    /* RSSI & DISTANCE INDICATOR */
+    .rssi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .rssi-header .config-label {
+      margin-bottom: 0;
+    }
+
+    .rssi-toggle-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .rssi-toggle-btn.active {
+      background: var(--green-bg);
+      border-color: rgba(62,207,110,0.3);
+      color: var(--green);
+    }
+
+    .rssi-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .rssi-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .rssi-distance-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rssi-distance-unit {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-left: 2px;
+    }
+
+    .rssi-zone-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+
+    .rssi-signal-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .signal-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 26px;
+    }
+
+    .signal-bar {
+      width: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      transition: background-color 0.25s, transform 0.25s;
+    }
+
+    .signal-bar:nth-child(1) { height: 8px; }
+    .signal-bar:nth-child(2) { height: 14px; }
+    .signal-bar:nth-child(3) { height: 20px; }
+    .signal-bar:nth-child(4) { height: 26px; }
+
+    .signal-bar.active-green { background: var(--green); }
+    .signal-bar.active-amber { background: var(--amber); }
+    .signal-bar.active-red   { background: var(--red); }
+
+    .rssi-dbm-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .proximity-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .proximity-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.35s ease, background-color 0.35s ease;
+    }
+
     /* TOAST */
     .toast {
       position: fixed;
@@ -500,13 +620,46 @@
       <!-- WIFI INSTRUCTIONS -->
       <div id="wifiInstructions" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
         <p style="font-size: 13px; color: var(--text2); margin-bottom: 12px;">Connect to the network below and access settings:</p>
-        <p style="font-size: 15px; color: var(--text); margin-bottom: 6px;">SSID: <strong style="color: var(--accent);">MY_AP_SSID</strong></p>
-        <p style="font-size: 15px; color: var(--text); margin-bottom: 16px;">Password: <strong style="color: var(--accent);">MY_AP_PASSPHRASE</strong></p>
+        <p style="font-size: 15px; color: var(--text); margin-bottom: 6px;">SSID: <strong style="color: var(--accent);">FXR_0000001</strong></p>
+        <p style="font-size: 15px; color: var(--text); margin-bottom: 16px;">Password: <strong style="color: var(--accent);">L@ctec123</strong></p>
         
         <a href="http://192.168.10.10" target="_blank" class="btn" style="background: var(--accent); color: #fff; text-decoration: none; padding: 12px; font-size: 14px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           Module Settings
         </a>
+      </div>
+    </div>
+
+    <!-- RSSI & DISTANCE INDICATOR -->
+    <div class="config-row" id="rssiRow">
+      <div class="rssi-header">
+        <span class="config-label">Signal &amp; Proximity</span>
+        <button class="rssi-toggle-btn" id="btnRssiToggle" onclick="toggleRssi()">Paused</button>
+      </div>
+
+      <div class="rssi-panel">
+        <div class="rssi-main">
+          <div>
+            <div class="rssi-distance-value">
+              <span id="distanceValue">--</span><span class="rssi-distance-unit">m</span>
+            </div>
+            <div class="rssi-zone-label" id="proximityZone">Waiting for RSSI...</div>
+          </div>
+
+          <div class="rssi-signal-box">
+            <div class="signal-bars" id="signalBars">
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+            </div>
+            <div class="rssi-dbm-text" id="rssiValue">-- dBm</div>
+          </div>
+        </div>
+
+        <div class="proximity-track">
+          <div class="proximity-fill" id="proximityFill"></div>
+        </div>
       </div>
     </div>
 
@@ -594,6 +747,7 @@
     let audioPollingInterval = null;
     let isAudioPollingActive = false;
     let isWifiActive = false;
+    let isRssiActive = false;
 
     const ttsConfig = { rate: 1.0, pitch: 1.0, volume: 1.0, voice: null };
 
@@ -713,6 +867,7 @@
         addLog('Notifications active. Waiting for data...', 'tts');
         toast('✅ Connected! Waiting for messages...');
         acquireWakeLock();
+        await setRssiPolling(true);
       } catch(e) {
         setStatus('error', 'Failed');
         addLog('Connection error: ' + e.message, 'err');
@@ -725,23 +880,18 @@
       const value = decoder.decode(event.target.value).trim();
       if (!value) return;
 
+      // Intercepta pacotes "RSSI:-58,DIST:1.85" para atualizar a UI sem acionar o TTS
+      const rssiMatch = value.match(/^RSSI:\s*(-?\d+)(?:,\s*DIST:\s*([\d.]+))?/i);
+      if (rssiMatch) {
+        const rssiDbm = parseInt(rssiMatch[1], 10);
+        const distanceM = rssiMatch[2] !== undefined ? parseFloat(rssiMatch[2]) : null;
+        updateRssiIndicator(rssiDbm, distanceM);
+        return;
+      }
+
       const now = new Date().toLocaleTimeString('en-US', { hour12: false });
       addLog(value, 'tts', now);
       enqueueTTS(value);
-    }
-
-    function onDisconnected() {
-      setStatus('idle', 'Disconnected');
-      showDisconnectedUI();
-      addLog('Device disconnected.', 'warn');
-      toast('🔴 Device disconnected');
-      releaseWakeLock();
-    }
-
-    async function disconnectBLE() {
-      if (bleDevice && bleDevice.gatt.connected) {
-        bleDevice.gatt.disconnect();
-      }
     }
 
     // ─── BLE COMMANDS ────────────────────────────────────────────────────────
@@ -778,6 +928,17 @@ async function sendBLECommand() {
         return;
       } else if (lowerText === "disable audio") {
         if (isAudioPollingActive) await toggleAudioPolling();
+        input.value = '';
+        return;
+      }
+
+      // Intercepts RSSI commands
+      else if (lowerText === "enable rssi") {
+        if (!isRssiActive) await setRssiPolling(true);
+        input.value = '';
+        return;
+      } else if (lowerText === "disable rssi") {
+        if (isRssiActive) await setRssiPolling(false);
         input.value = '';
         return;
       }
@@ -1027,6 +1188,94 @@ function startSpeechRecognition() {
       if (wakeLock) { wakeLock.release(); wakeLock = null; }
     }
 
+    // ─── RSSI & DISTANCE UI ──────────────────────────────────────────────────
+    async function toggleRssi() {
+      await setRssiPolling(!isRssiActive);
+    }
+
+    async function setRssiPolling(enable) {
+      if (!bleWriteChar) return;
+      const cmd = enable ? 'enable rssi' : 'disable rssi';
+      try {
+        await writeCommand(cmd);
+        isRssiActive = enable;
+        const btn = document.getElementById('btnRssiToggle');
+        btn.textContent = enable ? 'Live' : 'Paused';
+        btn.classList.toggle('active', enable);
+        addLog(`Command sent: "${cmd}"`, 'sys');
+        if (!enable) {
+          document.getElementById('proximityZone').textContent = 'Monitoring paused';
+        }
+      } catch (e) {
+        addLog('Error toggling RSSI: ' + e.message, 'err');
+      }
+    }
+
+    function updateRssiIndicator(rssiDbm, distanceM) {
+      document.getElementById('rssiValue').textContent = `${rssiDbm} dBm`;
+
+      if (distanceM !== null && !Number.isNaN(distanceM)) {
+        document.getElementById('distanceValue').textContent = distanceM.toFixed(2);
+      }
+
+      // Define nível das barras e cor conforme intensidade do sinal
+      let activeBars = 1;
+      let colorClass = 'active-red';
+      let fillColor = 'var(--red)';
+      let zoneText = 'Far · Weak signal';
+
+      if (rssiDbm >= -60) {
+        activeBars = 4;
+        colorClass = 'active-green';
+        fillColor = 'var(--green)';
+        zoneText = 'Immediate · Strong signal';
+      } else if (rssiDbm >= -70) {
+        activeBars = 3;
+        colorClass = 'active-green';
+        fillColor = 'var(--green)';
+        zoneText = 'Near · Good signal';
+      } else if (rssiDbm >= -80) {
+        activeBars = 2;
+        colorClass = 'active-amber';
+        fillColor = 'var(--amber)';
+        zoneText = 'Medium · Moderate signal';
+      }
+
+      const bars = document.querySelectorAll('#signalBars .signal-bar');
+      bars.forEach((bar, index) => {
+        bar.className = 'signal-bar';
+        if (index < activeBars) {
+          bar.classList.add(colorClass);
+        }
+      });
+
+      document.getElementById('proximityZone').textContent = zoneText;
+
+      // Barra de proximidade (escala visual de 0m a 10m: mais perto = barra mais cheia)
+      const fill = document.getElementById('proximityFill');
+      if (distanceM !== null && !Number.isNaN(distanceM)) {
+        const closenessPct = Math.max(8, Math.min(100, Math.round((1 - distanceM / 10) * 100)));
+        fill.style.width = `${closenessPct}%`;
+        fill.style.background = fillColor;
+      }
+    }
+
+    function resetRssiIndicator() {
+      isRssiActive = false;
+      const btn = document.getElementById('btnRssiToggle');
+      if (btn) {
+        btn.textContent = 'Paused';
+        btn.classList.remove('active');
+      }
+      document.getElementById('distanceValue').textContent = '--';
+      document.getElementById('rssiValue').textContent = '-- dBm';
+      document.getElementById('proximityZone').textContent = 'Waiting for RSSI...';
+      document.getElementById('proximityFill').style.width = '0%';
+      document.querySelectorAll('#signalBars .signal-bar').forEach(bar => {
+        bar.className = 'signal-bar';
+      });
+    }
+
     // ─── UI HELPERS ──────────────────────────────────────────────────────────
     function setStatus(state, text) {
     }
@@ -1043,6 +1292,7 @@ function startSpeechRecognition() {
       document.getElementById('commandRow').classList.add('visible');
       document.getElementById('audioPollingRow').classList.add('visible');
       document.getElementById('wifiRow').classList.add('visible');
+      document.getElementById('rssiRow').classList.add('visible');
     }
 
     function showDisconnectedUI() {
@@ -1056,6 +1306,8 @@ function startSpeechRecognition() {
       document.getElementById('commandRow').classList.remove('visible');
       document.getElementById('audioPollingRow').classList.remove('visible');
       document.getElementById('wifiRow').classList.remove('visible');
+      document.getElementById('rssiRow').classList.remove('visible');
+      resetRssiIndicator();
       setStatus('idle', 'Disconnected');
     }
 
